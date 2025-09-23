@@ -20,7 +20,7 @@ export default function Homepage() {
       console.log(res)
         if (res.error) {
           //console.log(res)
-          dispatch(error(res.error.message));
+          dispatch(error(res.payload.message));
         }
       });
   }
