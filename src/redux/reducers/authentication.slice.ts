@@ -3,9 +3,17 @@ import { axiosInstance } from '../axiosInstance';
 
 export const login = createAsyncThunk(
   'authentication/login',
-  async (credential: { username: string; password: string }) => {
-      const response = await axiosInstance.post('authentication/login', credential)
-      return response.data
+  async (credential: { username: string; password: string }, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post("/authentication/login", credential);
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        // backend error (401, 400, etc.)
+        return thunkAPI.rejectWithValue(error.response.data);
+      }
+      return thunkAPI.rejectWithValue({ message: error.message });
+    }
   }
 )
 
