@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { axiosInstance } from '../axiosInstance';
+import type { UserDetails } from '../../types';
 
 export const login = createAsyncThunk(
   'authentication/login',
@@ -9,7 +10,21 @@ export const login = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       if (error.response) {
-        // backend error (401, 400, etc.)
+        return thunkAPI.rejectWithValue(error.response.data);
+      }
+      return thunkAPI.rejectWithValue({ message: error.message });
+    }
+  }
+)
+
+export const register = createAsyncThunk(
+  'authentication/register',
+  async (userDetails: UserDetails, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post("/authentication/register", userDetails);
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
         return thunkAPI.rejectWithValue(error.response.data);
       }
       return thunkAPI.rejectWithValue({ message: error.message });
@@ -24,7 +39,8 @@ const authenticationSlice = createSlice({
     refreshToken: null,
     user: null,
     isFetchingUser: false,
-    isLoggingIn: false
+    isLoggingIn: false,
+    isRegistering: false
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -40,6 +56,15 @@ const authenticationSlice = createSlice({
       })
       .addCase(login.rejected, (state) => {
         state.isLoggingIn = false
+      })
+      .addCase(register.pending, (state) => {
+        state.isRegistering = true
+      })
+      .addCase(register.fulfilled, (state) => {
+        state.isRegistering = false
+      })
+      .addCase(register.rejected, (state) => {
+        state.isRegistering = false
       })
   },
 })
